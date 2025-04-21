@@ -45,6 +45,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
+    @ExceptionHandler(BusinessException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<BusinessErrorResponse> handleBusinessException(BusinessException ex) {
+        String message = ex.getMessage();
+        BusinessErrorResponse response = BusinessErrorResponse.builder().message(message).build();
+        return ResponseEntity.badRequest().body(response);
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Map<String, String>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
