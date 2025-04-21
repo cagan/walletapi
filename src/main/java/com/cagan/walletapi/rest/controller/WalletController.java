@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/wallets")
+@RequestMapping("/api/v1/wallets")
 @RequiredArgsConstructor
 public class WalletController {
     private final WalletMapper walletMapper = WalletMapper.INSTANCE;
