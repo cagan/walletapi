@@ -10,6 +10,6 @@ import java.time.LocalDateTime;
 
 @Builder
 public record GetTransactionDto(Long id, Long walletId, BigDecimal amount, TransactionType type,
-                                OppositePartyType oppositeParty, TransactionStatusType status, LocalDateTime createdAt,
+                                OppositePartyType oppositePartyType, TransactionStatusType status, LocalDateTime createdAt,
                                 LocalDateTime updatedAt) {
 }

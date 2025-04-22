@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -21,7 +22,7 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper = TransactionMapper.INSTANCE;
 
-    private static final BigDecimal MAX_TRANSACTION_AMOUNT = BigDecimal.valueOf(1000);
+    protected static final BigDecimal MAX_TRANSACTION_AMOUNT = BigDecimal.valueOf(1000);
 
     @Transactional(propagation = Propagation.MANDATORY)
     public GetTransactionDto createTransaction(CreateTransactionDto createTransactionDto) {
@@ -40,5 +41,10 @@ public class TransactionService {
         }
 
         transaction.setStatus(transactionStatusType);
+    }
+
+    public List<GetTransactionDto> getTransactionsByWalletId(Long walletId) {
+        List<Transaction> transactionEntities = transactionRepository.findByWalletIdOrderByCreatedAtDesc(walletId);
+        return transactionMapper.toGetTransactionDtoList(transactionEntities);
     }
 }
