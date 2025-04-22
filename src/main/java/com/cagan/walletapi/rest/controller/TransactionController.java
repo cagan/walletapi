@@ -4,10 +4,7 @@ import com.cagan.walletapi.dto.GetTransactionDto;
 import com.cagan.walletapi.service.transaction.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,4 +19,10 @@ public class TransactionController {
         List<GetTransactionDto> transactionDtoList = transactionService.getTransactionsByWalletId(walletId);
         return ResponseEntity.ok(transactionDtoList);
     }
+
+    @PostMapping("/approval/{transactionId}")
+    public ResponseEntity<Void> approveTransaction(@PathVariable Long transactionId) {
+        return ResponseEntity.noContent().build();
+    }
+
 }

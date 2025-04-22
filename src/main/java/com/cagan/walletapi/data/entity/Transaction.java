@@ -44,6 +44,12 @@ public class Transaction {
     @Column(nullable = false, length = 10, columnDefinition = "varchar(10)")
     private TransactionStatusType status;
 
+    @Column
+    private String source;
+
+    @Column
+    private String destination;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

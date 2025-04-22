@@ -1,15 +1,17 @@
 package com.cagan.walletapi.service.deposit;
 
+import com.cagan.walletapi.dto.CreateTransactionDto;
 import com.cagan.walletapi.dto.GetTransactionDto;
 import com.cagan.walletapi.dto.GetWalletDto;
 import com.cagan.walletapi.dto.MakeDepositDto;
 import com.cagan.walletapi.error.BusinessException;
+import com.cagan.walletapi.service.balance.BalanceUpdater;
 import com.cagan.walletapi.service.transaction.TransactionService;
 import com.cagan.walletapi.service.wallet.WalletService;
 import com.cagan.walletapi.util.enums.CurrencyType;
 import com.cagan.walletapi.util.enums.OppositePartyType;
 import com.cagan.walletapi.util.enums.TransactionStatusType;
-import org.assertj.core.api.AssertionsForInterfaceTypes;
+import com.cagan.walletapi.util.enums.TransactionType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,21 +24,23 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThatThrownBy;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DepositServiceTest {
+
     @Mock
     WalletService walletService;
 
     @Mock
     TransactionService transactionService;
 
+    @Mock
+    BalanceUpdater balanceUpdater;
+
     @InjectMocks
     DepositService depositService;
-
 
     @Test
     @DisplayName("makeDeposit should throw exception when wallet not found")
@@ -46,7 +50,7 @@ class DepositServiceTest {
 
         MakeDepositDto makeDepositDto = new MakeDepositDto(BigDecimal.valueOf(100), 1L, "1234-1234-1234-1234", OppositePartyType.IBAN);
 
-        AssertionsForInterfaceTypes.assertThatThrownBy(() -> depositService.makeDeposit(makeDepositDto))
+        assertThatThrownBy(() -> depositService.makeDeposit(makeDepositDto))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("Wallet not found for given ID: " + 1);
 
@@ -64,7 +68,7 @@ class DepositServiceTest {
         when(walletService.getWalletById(1L))
                 .thenReturn(Optional.of(walletDto));
 
-        AssertionsForInterfaceTypes.assertThatThrownBy(() -> depositService.makeDeposit(makeDepositDto))
+        assertThatThrownBy(() -> depositService.makeDeposit(makeDepositDto))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("Deposit amount must be greater than zero" + makeDepositDto.amount());
 
@@ -72,8 +76,8 @@ class DepositServiceTest {
     }
 
     @Test
-    @DisplayName("makeDeposit should update wallet balance and usable balance when transaction is approved")
-    void makeDeposit_should_update_wallet_balance_and_usable_balance_when_transaction_is_approved() {
+    @DisplayName("makeDeposit should make deposit by invoking transaction and balance update logics properly")
+    void makeDeposit_should_make_withdraw_by_invoking_transaction_and_balance_update_logics_properly() {
         MakeDepositDto makeDepositDto = new MakeDepositDto(BigDecimal.valueOf(100), 1L, "1234-1234-1234-1234", OppositePartyType.IBAN);
 
         GetWalletDto walletDto = new GetWalletDto(1L, "Test Wallet", CurrencyType.EUR.toString(), false, true, BigDecimal.ZERO, BigDecimal.ZERO);
@@ -81,38 +85,25 @@ class DepositServiceTest {
         when(walletService.getWalletById(1L))
                 .thenReturn(Optional.of(walletDto));
 
+        CreateTransactionDto createTransactionDto = CreateTransactionDto.builder()
+                .type(TransactionType.DEPOSIT)
+                .amount(makeDepositDto.amount())
+                .oppositePartyType(makeDepositDto.oppositePartyType())
+                .source(makeDepositDto.source())
+                .walletId(makeDepositDto.walletId())
+                .build();
+
         GetTransactionDto getTransactionDto = GetTransactionDto.builder()
                 .id(1L)
-                .walletId(1L)
+                .walletId(makeDepositDto.walletId())
                 .status(TransactionStatusType.APPROVED)
                 .build();
-        when(transactionService.createTransaction(any())).thenReturn(getTransactionDto);
+
+        when(transactionService.createTransaction(createTransactionDto)).thenReturn(getTransactionDto);
 
         depositService.makeDeposit(makeDepositDto);
-        verify(walletService).updateBalanceAndUsableBalance(1L, BigDecimal.valueOf(100), BigDecimal.valueOf(100));
-        verify(transactionService).createTransaction(any());
+
+        verify(transactionService, times(1)).createTransaction(createTransactionDto);
+        verify(balanceUpdater, times(1)).updateBalance(getTransactionDto.status(), walletDto, makeDepositDto.amount(), TransactionType.DEPOSIT);
     }
-
-    @Test
-    @DisplayName("makeDeposit should update wallet balance only when transaction is approved")
-    void makeDeposit_should_update_wallet_balance_only_when_transaction_is_approved() {
-        MakeDepositDto makeDepositDto = new MakeDepositDto(BigDecimal.valueOf(5000), 1L, "1234-1234-1234-1234", OppositePartyType.IBAN);
-
-        GetWalletDto walletDto = new GetWalletDto(1L, "Test Wallet", CurrencyType.EUR.toString(), false, true, BigDecimal.ZERO, BigDecimal.ZERO);
-
-        when(walletService.getWalletById(1L))
-                .thenReturn(Optional.of(walletDto));
-
-        GetTransactionDto getTransactionDto = GetTransactionDto.builder()
-                .id(1L)
-                .walletId(1L)
-                .status(TransactionStatusType.PENDING)
-                .build();
-        when(transactionService.createTransaction(any())).thenReturn(getTransactionDto);
-
-        depositService.makeDeposit(makeDepositDto);
-        verify(walletService).updateBalance(1L, BigDecimal.valueOf(5000));
-        verify(transactionService).createTransaction(any());
-    }
-
 }

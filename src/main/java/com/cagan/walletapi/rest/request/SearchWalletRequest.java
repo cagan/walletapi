@@ -18,6 +18,8 @@ import java.math.BigDecimal;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SearchWalletRequest {
 
+    private Long walletId;
+
     private Long customerId;
 
     private CurrencyType currency;

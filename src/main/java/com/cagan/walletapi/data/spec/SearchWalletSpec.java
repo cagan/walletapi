@@ -33,6 +33,10 @@ public class SearchWalletSpec {
 
         List<Predicate> predicates = new ArrayList<>();
 
+        if (Objects.nonNull(searchWalletDto.walletId())) {
+            predicates.add(cb.equal(wallet.get("id"), searchWalletDto.walletId()));
+        }
+
         if (Objects.nonNull(searchWalletDto.customerId())) {
             predicates.add(cb.equal(wallet.get("customer").get("id"), searchWalletDto.customerId()));
         }

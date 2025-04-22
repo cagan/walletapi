@@ -8,5 +8,5 @@ import java.math.BigDecimal;
 
 @Builder
 public record CreateTransactionDto(Long walletId, BigDecimal amount, TransactionType type,
-                                   OppositePartyType oppositePartyType) {
+                                   OppositePartyType oppositePartyType, String source, String destination) {
 }

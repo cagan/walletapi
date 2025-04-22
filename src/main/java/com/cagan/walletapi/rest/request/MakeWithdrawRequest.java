@@ -1,6 +1,6 @@
 package com.cagan.walletapi.rest.request;
 
-import com.cagan.walletapi.util.enums.CurrencyType;
+import com.cagan.walletapi.util.enums.OppositePartyType;
 import com.cagan.walletapi.validator.EnumValidator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotNull;
@@ -9,21 +9,25 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CreateWalletRequest {
+public class MakeWithdrawRequest {
 
     @NotNull
-    String walletName;
+    private BigDecimal amount;
 
     @NotNull
-    @EnumValidator(enumClass = CurrencyType.class, message = "Must be a valid currency type")
-    CurrencyType currency;
+    private Long walletId;
 
-    boolean activeForShopping = true;
+    @NotNull
+    private String destination;
 
-    boolean activeForWithdraw = true;
+    @NotNull
+    @EnumValidator(enumClass = OppositePartyType.class, message = "Must be a valid opposite party type" )
+    private OppositePartyType oppositePartyType;
 }

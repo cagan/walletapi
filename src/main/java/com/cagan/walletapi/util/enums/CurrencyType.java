@@ -7,6 +7,10 @@ public enum CurrencyType {
     TRY, USD, EUR;
 
     public static CurrencyType fromValue(String type) {
+        if (type == null) {
+            return null;
+        }
+
         return Arrays.stream(values())
                 .filter(value -> Objects.equals(value.toString(), type.toUpperCase()))
                 .findFirst().orElse(null);
