@@ -2,10 +2,7 @@ package com.cagan.walletapi.data.entity;
 
 import com.cagan.walletapi.util.enums.CurrencyType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -42,9 +39,11 @@ public class Wallet {
     @Column(nullable = false, columnDefinition = "boolean")
     private Boolean activeForWithdraw = true;
 
+    @Setter
     @Column(columnDefinition = "decimal(10, 2)", scale = 2, precision = 5)
     private BigDecimal balance;
 
+    @Setter
     @Column(columnDefinition = "decimal(10, 2)", scale = 2, precision = 5)
     private BigDecimal usableBalance;
 

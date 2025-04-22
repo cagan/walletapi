@@ -4,6 +4,7 @@ import com.cagan.walletapi.data.entity.Transaction;
 import com.cagan.walletapi.data.repository.TransactionRepository;
 import com.cagan.walletapi.dto.CreateTransactionDto;
 import com.cagan.walletapi.dto.GetTransactionDto;
+import com.cagan.walletapi.dto.GetTransactionWithWalletDto;
 import com.cagan.walletapi.mapper.TransactionMapper;
 import com.cagan.walletapi.util.enums.TransactionStatusType;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -46,5 +48,15 @@ public class TransactionService {
     public List<GetTransactionDto> getTransactionsByWalletId(Long walletId) {
         List<Transaction> transactionEntities = transactionRepository.findByWalletIdOrderByCreatedAtDesc(walletId);
         return transactionMapper.toGetTransactionDtoList(transactionEntities);
+    }
+
+    @Transactional
+    public Optional<GetTransactionWithWalletDto> getTransactionByIdWithWallet(Long id) {
+        return transactionRepository.findByIdWithWallet(id).map(transactionMapper::toGetTransactionWithWalletDto);
+    }
+
+    public void updateTransactionStatus(Long transactionId, TransactionStatusType status) {
+        transactionRepository.updateTransactionStatus(transactionId, status);
+        log.info("Transaction {} status updated to: {}", transactionId, status);
     }
 }

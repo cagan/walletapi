@@ -68,4 +68,8 @@ public class WalletService {
     public void updateUsableBalance(Long walletId, BigDecimal usableBalance) {
         walletRepository.updateUsableBalance(walletId, null, usableBalance);
     }
+
+    public void upsertWallet(Wallet wallet) {
+        walletRepository.save(wallet);
+    }
 }
