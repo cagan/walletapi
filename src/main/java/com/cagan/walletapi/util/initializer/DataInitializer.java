@@ -37,7 +37,20 @@ public class DataInitializer implements CommandLineRunner {
             user.setCustomer(customer);
             appUserRepository.save(user);
 
-            System.out.println("Default user and customer created.");
+            Customer customer2 = new Customer();
+            customer2.setName("AdminUser");
+            customer2.setSurname("AdminUser");
+            customer2.setTckn("12345678902");
+            customerRepository.save(customer2);
+
+            AppUser user2 = new AppUser();
+            user2.setUsername("admin");
+            user2.setPassword(passwordEncoder().encode("123456"));
+            user2.setRole(Role.EMPLOYEE);
+            user2.setCustomer(customer2);
+            appUserRepository.save(user2);
+
+            System.out.println("Default employee and customer created.");
         }
     }
 
