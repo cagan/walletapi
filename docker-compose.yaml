@@ -14,22 +14,26 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       timeout: 5s
       retries: 5
+  wallet-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wallet-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/walletdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    restart: unless-stopped
 
-  # invoice-service:
-  #   image: invoice-service:latest
-  #   container_name: invoice-service
-  #   ports:
-  #     - "8080:8080"
-  #   environment:
-  #     TZ: UTC
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #     kafka:
-  #       condition: service_healthy
 volumes:
   postgres_data:
