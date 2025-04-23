@@ -33,7 +33,6 @@ public class DepositService {
 
         checkDepositAmountEligibility(makeDepositDto);
 
-        // TODO users should only deposit their own wallets
         CreateTransactionDto createTransactionDto = depositMapper.toCreateTransactionDto(makeDepositDto);
         GetTransactionDto transaction = transactionService.createTransaction(createTransactionDto);
 
