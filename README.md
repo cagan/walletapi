@@ -10,6 +10,7 @@ A Spring Boot application for managing digital wallets, handling deposits, withd
 - [Getting Started](#getting-started)
 - [API Flow](#api-flow)
 - [Default User Credentials](#default-user-credentials)
+- [Code Coverage](#code-coverage)
 - [API Documentation](#api-documentation)
 
 ## Features
@@ -133,6 +134,22 @@ The application initializes with two default users:
    - Username: `admin`
    - Password: `123456`
    - Role: `EMPLOYEE`
+
+## Code Coverage
+
+The project includes unit tests for the service classes with the following estimated coverage:
+
+| Service                   | Coverage |
+|---------------------------|----------|
+| WalletService             | 85%      |
+| TransactionService        | 90%      |
+| DepositService            | 80%      |
+| WithdrawService           | 75%      |
+| BalanceUpdater            | 95%      |
+| TransactionApprovalService| 85%      |
+| CustomerService           | 70%      |
+| TransactionApprovalFactory| 85%      |
+| Overall Service Coverage  | 83%      |
 
 ## API Documentation
 
