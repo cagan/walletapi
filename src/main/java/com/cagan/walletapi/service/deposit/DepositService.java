@@ -9,6 +9,7 @@ import com.cagan.walletapi.mapper.DepositMapper;
 import com.cagan.walletapi.service.balance.BalanceUpdater;
 import com.cagan.walletapi.service.transaction.TransactionService;
 import com.cagan.walletapi.service.wallet.WalletService;
+import com.cagan.walletapi.util.enums.Role;
 import com.cagan.walletapi.util.enums.TransactionType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +29,7 @@ public class DepositService {
 
     @Transactional
     public void makeDeposit(MakeDepositDto makeDepositDto) {
-        GetWalletDto wallet = walletService.getWalletById(makeDepositDto.walletId())
-                .orElseThrow(() -> new BusinessException("Wallet not found for given ID: " + makeDepositDto.walletId()));
+        GetWalletDto wallet = getWallet(makeDepositDto);
 
         checkDepositAmountEligibility(makeDepositDto);
 
@@ -39,6 +39,16 @@ public class DepositService {
 
         balanceUpdater.updateBalance(transaction.status(), wallet, makeDepositDto.amount(), TransactionType.DEPOSIT);
         log.info("Deposit has been made: {}", makeDepositDto);
+    }
+
+    private GetWalletDto getWallet(MakeDepositDto makeDepositDto) {
+        if (Role.CUSTOMER.equals(makeDepositDto.role())) {
+            return walletService.getWalletByIdAndCustomerId(makeDepositDto.walletId(), makeDepositDto.customerId())
+                    .orElseThrow(() -> new BusinessException("Wallet not found for given customer ID: " + makeDepositDto.customerId()));
+        }
+
+        return walletService.getWalletById(makeDepositDto.walletId())
+                .orElseThrow(() -> new BusinessException("Wallet not found for given ID: " + makeDepositDto.walletId()));
     }
 
     private static void checkDepositAmountEligibility(MakeDepositDto makeDepositDto) {

@@ -59,4 +59,9 @@ public class TransactionService {
         transactionRepository.updateTransactionStatus(transactionId, status);
         log.info("Transaction {} status updated to: {}", transactionId, status);
     }
+
+    public List<GetTransactionDto> getTransactionsByWalletIdAndCustomerId(Long walletId, Long userId) {
+        List<Transaction> transactionEntities = transactionRepository.findByWalletIdAndCustomerId(walletId, userId);
+        return transactionMapper.toGetTransactionDtoList(transactionEntities);
+    }
 }

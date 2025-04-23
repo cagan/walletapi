@@ -8,10 +8,7 @@ import com.cagan.walletapi.error.BusinessException;
 import com.cagan.walletapi.service.balance.BalanceUpdater;
 import com.cagan.walletapi.service.transaction.TransactionService;
 import com.cagan.walletapi.service.wallet.WalletService;
-import com.cagan.walletapi.util.enums.CurrencyType;
-import com.cagan.walletapi.util.enums.OppositePartyType;
-import com.cagan.walletapi.util.enums.TransactionStatusType;
-import com.cagan.walletapi.util.enums.TransactionType;
+import com.cagan.walletapi.util.enums.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +45,7 @@ class DepositServiceTest {
         when(walletService.getWalletById(1L))
                 .thenReturn(Optional.empty());
 
-        MakeDepositDto makeDepositDto = new MakeDepositDto(BigDecimal.valueOf(100), 1L, "1234-1234-1234-1234", OppositePartyType.IBAN);
+        MakeDepositDto makeDepositDto = new MakeDepositDto(BigDecimal.valueOf(100), 1L, "1234-1234-1234-1234", OppositePartyType.IBAN, 1L, Role.EMPLOYEE);
 
         assertThatThrownBy(() -> depositService.makeDeposit(makeDepositDto))
                 .isInstanceOf(BusinessException.class)
@@ -61,9 +58,9 @@ class DepositServiceTest {
     @DisplayName("makeDeposit should throw exception when deposit amount is not proper")
     @ValueSource(longs = {0, -100})
     void makeDeposit_should_throw_exception_when_deposit_amount_is_not_proper(Long value) {
-        MakeDepositDto makeDepositDto = new MakeDepositDto(BigDecimal.valueOf(value), 1L, "1234-1234-1234-1234", OppositePartyType.IBAN);
+        MakeDepositDto makeDepositDto = new MakeDepositDto(BigDecimal.valueOf(value), 1L, "1234-1234-1234-1234", OppositePartyType.IBAN, 1L, Role.EMPLOYEE);
 
-        GetWalletDto walletDto = new GetWalletDto(1L, "Test Wallet", CurrencyType.EUR.toString(), false, true, BigDecimal.ZERO, BigDecimal.ZERO);
+        GetWalletDto walletDto = new GetWalletDto(1L, "Test Wallet", CurrencyType.EUR.toString(), false, true, BigDecimal.ZERO, BigDecimal.ZERO, 1L);
 
         when(walletService.getWalletById(1L))
                 .thenReturn(Optional.of(walletDto));
@@ -78,9 +75,9 @@ class DepositServiceTest {
     @Test
     @DisplayName("makeDeposit should make deposit by invoking transaction and balance update logics properly")
     void makeDeposit_should_make_withdraw_by_invoking_transaction_and_balance_update_logics_properly() {
-        MakeDepositDto makeDepositDto = new MakeDepositDto(BigDecimal.valueOf(100), 1L, "1234-1234-1234-1234", OppositePartyType.IBAN);
+        MakeDepositDto makeDepositDto = new MakeDepositDto(BigDecimal.valueOf(100), 1L, "1234-1234-1234-1234", OppositePartyType.IBAN, 1L, Role.EMPLOYEE);
 
-        GetWalletDto walletDto = new GetWalletDto(1L, "Test Wallet", CurrencyType.EUR.toString(), false, true, BigDecimal.ZERO, BigDecimal.ZERO);
+        GetWalletDto walletDto = new GetWalletDto(1L, "Test Wallet", CurrencyType.EUR.toString(), false, true, BigDecimal.ZERO, BigDecimal.ZERO, 1L);
 
         when(walletService.getWalletById(1L))
                 .thenReturn(Optional.of(walletDto));

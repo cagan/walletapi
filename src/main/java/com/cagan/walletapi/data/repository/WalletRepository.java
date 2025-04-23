@@ -1,5 +1,6 @@
 package com.cagan.walletapi.data.repository;
 
+import com.cagan.walletapi.data.entity.Customer;
 import com.cagan.walletapi.data.entity.Wallet;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
@@ -16,6 +17,12 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
     @QueryHints(value = @QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000"))
     Optional<Wallet> findByIdWithLock(Long walletId);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT w FROM Wallet w WHERE w.id = :walletId AND w.customer.id = :customerId")
+    @QueryHints(value = @QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000"))
+    Optional<Wallet> findByIdAndCustomerIdWithLock(Long walletId, Long customerId);
+
+
     @Modifying
     @Transactional
     @Query("UPDATE Wallet w SET w.balance = :balance, w.usableBalance = :usableBalance WHERE w.id = :walletId")
@@ -31,4 +38,6 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
     @Transactional
     @Query("UPDATE Wallet w SET w.usableBalance = :usableBalance WHERE w.id = :walletId")
     void updateUsableBalance(Long walletId, Object o, BigDecimal usableBalance);
+
+    Long customer(Customer customer);
 }

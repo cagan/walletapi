@@ -1,14 +1,12 @@
 package com.cagan.walletapi.service.withdraw;
 
-import com.cagan.walletapi.dto.CreateTransactionDto;
-import com.cagan.walletapi.dto.GetTransactionDto;
-import com.cagan.walletapi.dto.GetWalletDto;
-import com.cagan.walletapi.dto.MakeWithdrawDto;
+import com.cagan.walletapi.dto.*;
 import com.cagan.walletapi.error.BusinessException;
 import com.cagan.walletapi.mapper.WithdrawMapper;
 import com.cagan.walletapi.service.balance.BalanceUpdater;
 import com.cagan.walletapi.service.transaction.TransactionService;
 import com.cagan.walletapi.service.wallet.WalletService;
+import com.cagan.walletapi.util.enums.Role;
 import com.cagan.walletapi.util.enums.TransactionType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +27,7 @@ public class WithdrawService {
 
     @Transactional
     public void makeWithdraw(MakeWithdrawDto makeWithdrawDto) {
-        GetWalletDto wallet = walletService.getWalletById(makeWithdrawDto.walletId())
-                .orElseThrow(() -> new BusinessException("Wallet not found for given ID: " + makeWithdrawDto.walletId()));
+        GetWalletDto wallet = getWallet(makeWithdrawDto);
 
         checkWalletSettingsForWithdraw(wallet);
         checkSufficientBalance(wallet, makeWithdrawDto.amount());
@@ -41,6 +38,17 @@ public class WithdrawService {
         balanceUpdater.updateBalance(transaction.status(), wallet, makeWithdrawDto.amount(), TransactionType.WITHDRAW);
         log.info("Withdrawal has been made: {}", makeWithdrawDto);
     }
+
+    private GetWalletDto getWallet(MakeWithdrawDto makeWithdrawDto) {
+        if (Role.CUSTOMER.equals(makeWithdrawDto.role())) {
+            return walletService.getWalletByIdAndCustomerId(makeWithdrawDto.walletId(), makeWithdrawDto.customerId())
+                    .orElseThrow(() -> new BusinessException("Wallet not found for given customer ID: " + makeWithdrawDto.customerId()));
+        }
+
+        return walletService.getWalletById(makeWithdrawDto.walletId())
+                .orElseThrow(() -> new BusinessException("Wallet not found for given ID: " + makeWithdrawDto.walletId()));
+    }
+
 
     private void checkWalletSettingsForWithdraw(GetWalletDto wallet) {
         if (!wallet.activeForWithdraw()) {

@@ -19,10 +19,12 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("SELECT t FROM Transaction t JOIN FETCH t.wallet WHERE t.wallet.id = :walletId ORDER BY t.createdAt DESC")
     List<Transaction> findByWalletIdOrderByCreatedAtDesc(Long walletId);
 
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT t FROM Transaction t JOIN FETCH t.wallet WHERE t.id = :transactionId")
     Optional<Transaction> findByIdWithWallet(Long transactionId);
+
+    @Query("SELECT t FROM Transaction t JOIN FETCH t.wallet WHERE t.wallet.id = :walletId and t.wallet.customer.id = :customerId ORDER BY t.createdAt DESC")
+    List<Transaction> findByWalletIdAndCustomerId(Long walletId, Long customerId);
 
     @Transactional
     @Modifying

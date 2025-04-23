@@ -4,6 +4,7 @@ import com.cagan.walletapi.data.entity.Wallet;
 import com.cagan.walletapi.data.repository.WalletRepository;
 import com.cagan.walletapi.dto.CreateWalletDto;
 import com.cagan.walletapi.error.BusinessException;
+import com.cagan.walletapi.service.customer.CustomerService;
 import com.cagan.walletapi.util.enums.CurrencyType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,9 @@ class WalletServiceTest {
 
     @Mock
     WalletRepository walletRepository;
+
+    @Mock
+    CustomerService customerService;
 
     @InjectMocks
     WalletService walletService;

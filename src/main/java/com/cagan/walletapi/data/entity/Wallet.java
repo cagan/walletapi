@@ -22,6 +22,7 @@ public class Wallet {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Setter
     @JoinColumn(name = "customer_id", referencedColumnName = "id", updatable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private Customer customer;

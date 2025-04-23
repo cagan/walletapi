@@ -6,6 +6,6 @@ import lombok.Builder;
 
 import java.math.BigDecimal;
 
-@Builder
+@Builder(toBuilder = true)
 public record SearchWalletDto(Long walletId, Long customerId, CurrencyType currency, BigDecimal amount, AmountFilterType amountFilterType) {
 }

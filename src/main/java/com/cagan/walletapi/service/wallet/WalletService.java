@@ -1,5 +1,6 @@
 package com.cagan.walletapi.service.wallet;
 
+import com.cagan.walletapi.data.entity.Customer;
 import com.cagan.walletapi.data.entity.Wallet;
 import com.cagan.walletapi.data.repository.WalletRepository;
 import com.cagan.walletapi.data.spec.SearchWalletSpec;
@@ -8,7 +9,10 @@ import com.cagan.walletapi.dto.GetWalletDto;
 import com.cagan.walletapi.dto.SearchWalletDto;
 import com.cagan.walletapi.error.BusinessException;
 import com.cagan.walletapi.mapper.WalletMapper;
+import com.cagan.walletapi.security.CustomUserDetails;
+import com.cagan.walletapi.service.customer.CustomerService;
 import com.cagan.walletapi.util.enums.CurrencyType;
+import com.cagan.walletapi.util.enums.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,19 +30,34 @@ import java.util.stream.Stream;
 public class WalletService {
     private final WalletRepository walletRepository;
     private final SearchWalletSpec searchWalletSpec;
+    private final CustomerService customerService;
     private final WalletMapper walletMapper = WalletMapper.INSTANCE;
 
     public GetWalletDto createWallet(CreateWalletDto createWalletDto) {
         validateCreation(createWalletDto);
 
         Wallet wallet = walletMapper.toEntity(createWalletDto);
+        setCustomerOfWallet(createWalletDto, wallet);
         Wallet savedWallet = walletRepository.save(wallet);
 
         log.info("Wallet has been created: {}", savedWallet);
         return walletMapper.toGetWalletDto(savedWallet);
     }
 
-    public List<GetWalletDto> searchWallets(SearchWalletDto searchWalletDto) {
+    private void setCustomerOfWallet(CreateWalletDto createWalletDto, Wallet wallet) {
+        Customer customer = customerService.getCustomerById(createWalletDto.userId());
+        wallet.setCustomer(customer);
+    }
+
+    public List<GetWalletDto> searchWallets(SearchWalletDto searchWalletDto, CustomUserDetails user) {
+        Role userRole = user.getRole();
+
+        if (userRole.equals(Role.CUSTOMER)) {
+            searchWalletDto = searchWalletDto.toBuilder()
+                    .customerId(user.getUserId())
+                    .build();
+        }
+
         return searchWalletSpec.searchWallets(searchWalletDto);
     }
 
@@ -54,6 +73,12 @@ public class WalletService {
     @Transactional(readOnly = true)
     public Optional<GetWalletDto> getWalletById(Long id) {
         return walletRepository.findByIdWithLock(id)
+                .map(walletMapper::toGetWalletDto);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<GetWalletDto> getWalletByIdAndCustomerId(Long id, Long customerId) {
+        return walletRepository.findByIdAndCustomerIdWithLock(id, customerId)
                 .map(walletMapper::toGetWalletDto);
     }
 

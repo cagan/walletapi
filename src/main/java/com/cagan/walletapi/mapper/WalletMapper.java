@@ -21,11 +21,12 @@ public interface WalletMapper {
     @Mapping(target = "currency", expression = "java(com.cagan.walletapi.util.enums.CurrencyType.fromValue(createWalletDto.currency()))")
     Wallet toEntity(CreateWalletDto createWalletDto);
 
-    GetWalletDto toGetWalletDto(Wallet savedWallet);
+    @Mapping(target = "customerId", source = "wallet.customer.id")
+    GetWalletDto toGetWalletDto(Wallet wallet);
 
-    List<GetWalletDto> toGetWalletDtoList(List<Wallet> savedWallet);
+    List<GetWalletDto> toGetWalletDtoList(List<Wallet> wallets);
 
-    CreateWalletDto toCreateWalletDto(CreateWalletRequest request);
+    CreateWalletDto toCreateWalletDto(CreateWalletRequest request, Long userId);
 
     GetWalletResponse toGetWalletResponse(GetWalletDto getWalletDto);
 
