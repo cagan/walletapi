@@ -8,6 +8,7 @@ A Spring Boot application for managing digital wallets, handling deposits, withd
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
+- [Kubernetes Deployment](#kubernetes-deployment)
 - [API Flow](#api-flow)
 - [Default User Credentials](#default-user-credentials)
 - [Code Coverage](#code-coverage)
@@ -30,6 +31,7 @@ A Spring Boot application for managing digital wallets, handling deposits, withd
 - Spring Data JPA
 - PostgreSQL
 - Docker & Docker Compose
+- Kubernetes
 - Maven
 
 ## Project Structure
@@ -99,6 +101,29 @@ docker-compose up -d
 
 The application will be available at http://localhost:8080
 
+### Running with Kubernetes
+
+For local development and deployment on Kubernetes, use the provided `dev-k8s.sh` script:
+
+```bash
+chmod +x dev-k8s.sh
+./dev-k8s.sh
+```
+
+This script will:
+1. Verify Minikube is running or start it
+2. Configure Docker to use Minikube's Docker daemon
+3. Build the application with Maven
+4. Create a Docker image in Minikube's environment
+5. Deploy PostgreSQL and the Wallet API to Kubernetes
+6. Provide the URL to access the API
+
+The script provides detailed output with information on how to:
+- Check pod status
+- View logs
+- Access the API
+- Clean up the deployment
+
 ## API Flow
 
 The typical flow of the API is as follows:
@@ -159,8 +184,43 @@ The API is documented using OpenAPI/Swagger. Once the application is running, yo
 http://localhost:8080/swagger-ui.html
 ```
 
+When running on Kubernetes, use the Minikube IP and NodePort:
+
+```
+http://<minikube-ip>:<nodeport>/swagger-ui.html
+```
+
 Authentication uses JWT Bearer tokens. After logging in, include the token in the Authorization header for all subsequent requests:
 
 ```
 Authorization: Bearer <your-jwt-token>
+```
+
+## Kubernetes Deployment
+
+The project includes Kubernetes deployment configurations in the `kubernetes/` directory:
+
+- `kubernetes/postgres-deployment.yaml` - PostgreSQL database deployment
+- `kubernetes/wallet-api-deployment.yaml` - Wallet API deployment with service
+- `kubernetes/start-minikube.sh` - Script to start Minikube
+- `kubernetes/deploy.sh` - Script for deploying to Kubernetes
+
+For local development, the `dev-k8s.sh` script in the project root provides a streamlined workflow for building and deploying to a local Kubernetes cluster (Minikube).
+
+### Requirements:
+
+- Minikube
+- kubectl
+- Docker
+
+### Accessing the API:
+
+After deploying with Kubernetes, you can access the API using:
+
+```bash
+# Get the URL
+minikube service wallet-api --url
+
+# Open in default browser
+minikube service wallet-api
 ```
